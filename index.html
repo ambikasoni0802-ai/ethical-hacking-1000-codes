@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html lang="hi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Ethical Hacking 1000 Codes Hub</title>
+    <style>
+        body { font-family: Arial, sans-serif; background: #121212; color: #fff; padding: 15px; }
+        input { width: 100%; padding: 10px; margin-bottom: 20px; font-size: 16px; border-radius: 5px; }
+        .card { background: #1e1e1e; padding: 15px; border-radius: 8px; margin-bottom: 15px; border: 1px solid #333; }
+        pre { background: #000; color: #00ff00; padding: 10px; border-radius: 5px; overflow-x: auto; }
+        button { background: #008cba; color: white; border: none; padding: 8px 12px; cursor: pointer; border-radius: 4px; }
+    </style>
+</head>
+<body>
+
+    <h2>Ethical Hacking Codes Hub</h2>
+    <input type="text" id="search" placeholder="Search code, category or language..." onkeyup="searchCodes()">
+    
+    <div id="codes-list">लोड हो रहा है...</div>
+
+    <script>
+        let allCodes = [];
+
+        // आपके GitHub Raw JSON फाइल का लिंक यहाँ आएगा
+        const GITHUB_JSON_URL = 'YOUR_GITHUB_RAW_URL_HERE';
+
+        async function fetchCodes() {
+            try {
+                const res = await fetch(GITHUB_JSON_URL);
+                allCodes = await res.json();
+                renderCodes(allCodes);
+            } catch (err) {
+                document.getElementById('codes-list').innerText = 'डेटा लोड करने में समस्या आई।';
+            }
+        }
+
+        function renderCodes(data) {
+            const container = document.getElementById('codes-list');
+            container.innerHTML = '';
+            data.forEach(item => {
+                container.innerHTML += `
+                    <div class="card">
+                        <h3>${item.title} <small>(${item.language})</small></h3>
+                        <p><b>कैटेगरी:</b> ${item.category}</p>
+                        <p>${item.description}</p>
+                        <pre><code>${item.code}</code></pre>
+                        <button onclick="navigator.clipboard.writeText(\`${item.code}\`)">Copy Code</button>
+                    </div>
+                `;
+            });
+        }
+
+        function searchCodes() {
+            const query = document.getElementById('search').value.toLowerCase();
+            const filtered = allCodes.filter(item => 
+                item.title.toLowerCase().includes(query) || 
+                item.category.toLowerCase().includes(query) ||
+                item.language.toLowerCase().includes(query)
+            );
+            renderCodes(filtered);
+        }
+
+        fetchCodes();
+    </script>
+</body>
+</html>
+
